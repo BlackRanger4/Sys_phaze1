@@ -1,0 +1,650 @@
+% This LaTeX was auto-generated from MATLAB code.
+% To make changes, update the MATLAB code and export to LaTeX again.
+
+\documentclass{article}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{hyperref}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{epstopdf}
+\usepackage[table]{xcolor}
+\usepackage{matlab}
+
+\sloppy
+\epstopdfsetup{outdir=./}
+\graphicspath{ {./Final_images/} }
+
+\matlabmultipletitles
+
+\begin{document}
+
+\matlabtitle{Signal and System}
+
+\matlabtitle{Project (phaze1)}
+
+\matlabtitle{Ali sadeghian 400101464}
+
+\vspace{1em}
+
+\begin{par}
+\begin{center}
+github address :https://github.com/BlackRanger4/Sys\_phaze1.git
+\end{center}
+\end{par}
+
+\vspace{1em}
+
+\matlabtitle{Q1}
+
+\begin{par}
+\begin{flushleft}
+first part : $F^{-1} \left(1+H_{\mathrm{Hp}} \right)F$
+\end{flushleft}
+\end{par}
+
+\begin{par}
+\begin{center}
+In this section, we are asked to make the original image more clear by adding a coefficient of
+\end{center}
+\end{par}
+
+\begin{par}
+\begin{center}
+ high frequencies. High frequency in the image means extreme color changes that mostly occur 
+\end{center}
+\end{par}
+
+\begin{par}
+\begin{center}
+at the edges of objects. By adding edges With the image itself, the clarity of the changes increases.
+\end{center}
+\end{par}
+
+
+\vspace{1em}
+\begin{par}
+\begin{flushleft}
+second part: $f+F^{-1} \left\lbrace 4\pi^2 \left(u^2 +v^2 \right)F\left(u,v\right)\right\rbrace$
+\end{flushleft}
+\end{par}
+
+\begin{par}
+\begin{center}
+As argued in the previous section, by summing the high frequencies, the clarity will be increased, in this section,
+\end{center}
+\end{par}
+
+\begin{par}
+\begin{center}
+ the high frequencies are amplified by a greater factor than the lower frequencies, so the image resolution is increased.            
+\end{center}
+\end{par}
+
+
+\vspace{1em}
+\begin{matlabcode}
+clc
+close all
+clear all
+\end{matlabcode}
+
+
+\begin{par}
+\begin{flushleft}
+Part1:
+\end{flushleft}
+\end{par}
+
+\begin{matlabcode}
+% Read in images
+I = imread('q1.jpg');
+I_mirror = fliplr(I);
+% Convert image to double precision
+I = im2double(I);
+% Compute the 2D Fourier transform of the image using fft2 function
+F = fft2(I);
+F_copy = F ;
+[M, N , ~] = size(F);
+% cut off f
+D0 = 50;
+% Create a high-pass filter
+u = 0:(M-1);
+v = 0:(N-1);
+idx = find(u > M/2);
+u(idx) = u(idx) - M;
+idy = find(v > N/2);
+v(idy) = v(idy) - N;
+[V, U] = meshgrid(v, u);
+D = sqrt(U.^2 + V.^2);
+H = double(D > D0);
+% Replicate the high-pass filter for each color channel
+HH = zeros([M,N,3]);
+HH(:,:,1) = H;
+HH(:,:,2) = H;
+HH(:,:,3) = H;
+% Apply the high-pass filter to the Fourier transform of the image
+k = 0.4 ;
+G = (k*HH+1).* F;
+GG = k*HH.* F;
+% Compute the inverse 2D Fourier transform of the filtered spectrum using
+% ifft2 function
+g = real(ifft2(G));
+gg =  real(ifft2(GG));
+% Display original and filtered images side-by-side in a montage
+montage({I_mirror,g,I_mirror,gg})
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{84.61615654791771em}]{figure_0.eps}
+\end{center}
+\begin{matlabcode}
+imshow(g)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{60.61214249874561em}]{figure_1.eps}
+\end{center}
+
+
+\begin{par}
+\begin{flushleft}
+FFT of picture
+\end{flushleft}
+\end{par}
+
+\begin{matlabcode}
+% Compute and display the log magnitude of each color channel of the Fourier 
+% transform of the image
+FR = abs(F_copy(:,:,1));
+FB = abs(F_copy(:,:,2));
+FG = abs(F_copy(:,:,3));
+
+FR = log(FR);
+FB = log(FB);
+FG = log(FG);
+
+imagesc(abs(FR))
+colorbar
+title("FFT Of R Chanal")
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{60.61214249874561em}]{figure_2.eps}
+\end{center}
+\begin{matlabcode}
+imagesc(abs(FB))
+colorbar
+title("FFT Of B Chanal")
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{60.61214249874561em}]{figure_3.eps}
+\end{center}
+\begin{matlabcode}
+imagesc(abs(FG))
+colorbar
+title("FFT Of G Chanal")
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{60.61214249874561em}]{figure_4.eps}
+\end{center}
+
+
+\begin{par}
+\begin{flushleft}
+Part2:
+\end{flushleft}
+\end{par}
+
+\begin{matlabcode}
+% Compute the 2D Fourier transform of the image using fft2 function
+F = fft2(I);
+% Create a grid of spatial frequencies
+[M, N,NN] = size(F);
+u = 0:(M-1);
+v = 0:(N-1);
+idx = find(u > M/2);
+u(idx) = u(idx) - M;
+idy = find(v > N/2);
+v(idy) = v(idy) - N;
+[V, U] = meshgrid(v, u);
+% Create a high-pass filter
+H = 4*pi^2*(U.^2 + V.^2);
+% Replicate the high-pass filter for each color channel
+HH = zeros([M,N,3]);
+HH(:,:,1) = H;
+HH(:,:,2) = H;
+HH(:,:,3) = H;
+% Apply the high-pass filter to the Fourier transform of the image
+G = HH.*F; 
+% Compute the given function by adding a fraction of the inverse 2D Fourier 
+% transform of the filtered spectrum to the original image
+k = 1e-6;
+Fpass = k*real(ifft2(G)); 
+J = I + Fpass;
+
+% Display original and filtered images side-by-side in a montage
+montage({I_mirror, J,I_mirror, Fpass})
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{84.61615654791771em}]{figure_5.eps}
+\end{center}
+\begin{matlabcode}
+imshow(J)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{60.61214249874561em}]{figure_6.eps}
+\end{center}
+
+
+\matlabtitle{Q2}
+
+\begin{par}
+\begin{center}
+In this section, we first categorize the size of the colors to find out what color each part of the photo is in, then we try to improve the brightness 
+\end{center}
+\end{par}
+
+\begin{par}
+\begin{center}
+by applying a variable shift with the center of color focus (most histogram), then by applying High pass Gaussian filter, we increase the resolution
+\end{center}
+\end{par}
+
+\begin{par}
+\begin{center}
+, then by detecting the sky and background, we subtract the original image from the background, then we add it with the sky, then we apply a filter
+\end{center}
+\end{par}
+
+\begin{par}
+\begin{center}
+ to correct the contrast, and finally, by applying a histogram filter, we try We increase the brightness of the image.
+\end{center}
+\end{par}
+
+\begin{matlabcode}
+clc
+clear all
+close all
+\end{matlabcode}
+
+
+\begin{matlabcode}
+% Read in images
+II = imread('pic.jpg');
+I = II;
+figure
+subplot(1,2,1)
+imshow(I)
+subplot(1,2,2)
+imhist(I,256)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{56.196688409433015em}]{figure_7.eps}
+\end{center}
+
+
+\begin{matlabcode}
+% Convert image to double precision
+IP = double(II);
+D = linspace(0,26,27)*10;
+for i=1:26
+    % Create a binary mask for each range of pixel values
+    H(:,:,i) = IP>D(i) & IP<D(i+1);
+end
+\end{matlabcode}
+
+
+\begin{matlabcode}
+figure
+% Display the binary masks for the first 26 ranges of pixel values
+for i=1:6
+    subplot(2,3,i)
+    F(:,:,i) = H(:,:,i).*IP;
+    imshow(uint8(F(:,:,i)))
+end
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{56.196688409433015em}]{figure_8.eps}
+\end{center}
+\begin{matlabcode}
+figure
+for i=7:12
+    subplot(2,3,i-6)
+    F(:,:,i) = H(:,:,i).*IP;
+    imshow(uint8(F(:,:,i)))
+end
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{56.196688409433015em}]{figure_9.eps}
+\end{center}
+\begin{matlabcode}
+figure
+for i=13:18
+    subplot(2,3,i-12)
+    F(:,:,i) = H(:,:,i).*IP;
+    imshow(uint8(F(:,:,i)))
+end
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{56.196688409433015em}]{figure_10.eps}
+\end{center}
+\begin{matlabcode}
+figure
+for i=19:24
+    subplot(2,3,i-18)
+    F(:,:,i) = H(:,:,i).*IP;
+    imshow(uint8(F(:,:,i)))
+end
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{56.196688409433015em}]{figure_11.eps}
+\end{center}
+\begin{matlabcode}
+figure
+for i=25:26
+    subplot(1,2,i-24)
+    F(:,:,i) = H(:,:,i).*IP;
+    imshow(uint8(F(:,:,i)))
+end
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{56.196688409433015em}]{figure_12.eps}
+\end{center}
+
+
+\begin{par}
+\begin{flushleft}
+shifting cololr value
+\end{flushleft}
+\end{par}
+
+\begin{matlabcode}
+Ipp = double(II);
+[n , m] =size(I);
+% Shifting color value using a piecewise cubic function with two segments 
+D = 55;
+A = 10;
+for i=1:n
+    for j=1:m
+        temp = Ipp(i,j);
+        if temp < D
+            Error = (A/(D))*(temp -D) + (A/(D)^3)*(temp -D)^3 ;
+            Ipp(i,j) = floor(Ipp(i,j)-Error)+1;
+        else 
+            Error = (A/((255-D)^4))*(temp - D)^4 + (A/(255-D))*(temp - D); 
+            Ipp(i,j) = floor(Ipp(i,j)-Error);
+        end
+    end
+end
+% Display a montage of the original image and the modified image,
+% as well as their histograms.
+figure
+figure
+montage({II,uint8(Ipp)})
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_13.eps}
+\end{center}
+\begin{matlabcode}
+imhist(uint8(Ipp),256)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_14.eps}
+\end{center}
+\begin{matlabcode}
+imhist(II,256)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_15.eps}
+\end{center}
+\begin{matlabcode}
+imshow(uint8(Ipp))
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_16.eps}
+\end{center}
+
+
+\begin{par}
+\begin{flushleft}
+image sharpening
+\end{flushleft}
+\end{par}
+
+\begin{matlabcode}
+% Image sharpening using a high-pass filter created by subtracting a 
+% low-pass Gaussian filter from an average filter.
+% Set filter size
+filter_size = 128;
+% Define the standard deviation of the Gaussian filter
+sigma = 0.125;
+% Create the low-pass Gaussian filter
+h = fspecial('gaussian', filter_size, sigma);
+h_high = fspecial('average', filter_size) - h;
+% Apply the low-pass filter to the image
+high_pass_filtered_image = imfilter(uint8(Ipp),h_high);
+Fpass = uint8(Ipp) + high_pass_filtered_image *0.2;
+montage({II, high_pass_filtered_image , uint8(Ipp) , uint8(Fpass)})
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_17.eps}
+\end{center}
+
+
+\begin{par}
+\begin{flushleft}
+finding sky
+\end{flushleft}
+\end{par}
+
+\begin{matlabcode}
+% Finding sky by thresholding pixel values and removing non-sky points 
+% using morphological opening.
+% Create a copy of the image
+Ip = double(Fpass);
+% Get the size of the image
+[n , m] =size(Ip);
+% Loop through each pixel in the image
+for i=1:n
+    for j=1:m
+         % Set pixel value to 0 if it is less than 208
+        if Ip(i,j)<196
+            Ip(i,j)=0;
+        end
+    end
+end
+% Display the modified image
+imshow(uint8(Ip))
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_18.eps}
+\end{center}
+\begin{matlabcode}
+% Create a disk-shaped structuring element with radius
+% 7 and 0 degrees of arc
+se = strel('disk',5,0);
+% Remove non-sky points from the image
+Ipp = imopen(Ip,se);
+Ipp = uint8(Ipp);
+imshow(Ipp)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_19.eps}
+\end{center}
+
+
+\begin{par}
+\begin{flushleft}
+Remove the background from the original photo
+\end{flushleft}
+\end{par}
+
+\begin{matlabcode}
+% Create a disk-shaped structuring element with radius
+% 9 and 6 degrees of arc
+se = strel('disk',5,6);
+% Perform morphological opening on the original image 
+% using the structuring element to approximate the background
+background = imopen(Fpass,se);
+% Display the background approximation image
+imshow(background)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_20.eps}
+\end{center}
+\begin{matlabcode}
+% Subtract a fraction of the background approximation image 
+% from the original image and multiply by a factor to adjust contrast
+I1 = 1.5*(Fpass - 0.4*background);
+% Display the result of contrast adjustment
+imshow(I1)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_21.eps}
+\end{center}
+\begin{matlabcode}
+% add sky
+I2 = I1 + 0.1*Ipp;
+imshow(I2)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_22.eps}
+\end{center}
+
+
+\begin{par}
+\begin{flushleft}
+applying contrast correction filter
+\end{flushleft}
+\end{par}
+
+\begin{matlabcode}
+% Set parameters for local Laplacian filtering
+sigma = 0.9;
+alpha = 1.05;
+beta  = 3; 
+numLevels = 128;
+% Perform local Laplacian filtering on the enhanced image using the 
+% specified parameters and add a fraction of the result of morphological
+% opening to enhance edges and details further
+I3 = locallapfilt(I2, sigma, alpha, beta, 'NumIntensityLevels', numLevels);
+imshow(I3)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_23.eps}
+\end{center}
+
+
+\begin{matlabcode}
+% Enhance contrast using adaptive histogram equalization with a custom
+% clip limit
+I4 = adapthisteq(I3,'NumTiles',[18 24],'ClipLimit', 0.003,'Distribution' ...
+    ,'exponential','Alpha',0.35);
+imshow(I4)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_24.eps}
+\end{center}
+\begin{matlabcode}
+imshow(II)
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{107.73707977922732em}]{figure_25.eps}
+\end{center}
+
+
+\matlabtitle{Q3}
+
+\begin{par}
+\begin{center}
+In this section, by applying a low-pass Gaussian filter to Marlin's photo and a high-pass filter to 
+\end{center}
+\end{par}
+
+\begin{par}
+\begin{center}
+Einstein's photo and adding the two, we try to create a hybrid photo.
+\end{center}
+\end{par}
+
+\begin{matlabcode}
+clc
+clear all
+close all
+\end{matlabcode}
+
+
+\begin{matlabcode}
+% Read in images
+Marilynl = imread('marilyn.jpg');
+Einsteinl = imread('einstein.jpg');
+
+% convert to gray picture
+Einsteinl = rgb2gray(Einsteinl);
+% Marilynl = rgb2gray(Marilynl);  Marilynl is gray
+
+% Resize images to be of same size
+Resize = 512;
+Marilynl = imresize(Marilynl, [Resize Resize]);
+Einsteinl = imresize(Einsteinl, [Resize Resize]);
+
+% Convert images to double precision
+Marilyn  = double(Marilynl) ;
+Einstein = double(Einsteinl);
+
+% Set filter size
+filter_size = 64;
+% Define the standard deviation of the Gaussian filter
+sigma = 8;
+% Create the low-pass Gaussian filter
+h = fspecial('gaussian', filter_size, sigma);
+% Apply the low-pass filter to the image
+low_pass_filtered_image = imfilter(Marilyn, h);
+
+% Create the high-pass filter by subtracting the low-pass filter from
+% an all-pass filter
+filter_size = 250;
+sigma = 0.05;
+h = fspecial('gaussian', filter_size, sigma);
+h_high = fspecial('average', filter_size) - h;
+% Apply the high-pass filter to the image
+high_pass_filtered_image = imfilter(Einstein, h_high);
+% Display original images side-by-side in a montage
+montage({Einsteinl,Marilynl})
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{84.61615654791771em}]{figure_26.eps}
+\end{center}
+\begin{matlabcode}
+% Display filtered images side-by-side in a montage
+montage({uint8(high_pass_filtered_image),uint8(low_pass_filtered_image)})
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{84.61615654791771em}]{figure_27.eps}
+\end{center}
+\begin{matlabcode}
+% Invert the high-pass_filtered_image color
+white_high_pass_filtered_image = 255-high_pass_filtered_image;
+% Display inverted and non-inverted high-pass filtered images 
+% side-by-side in a montage
+montage({uint8(high_pass_filtered_image),uint8( white_high_pass_filtered_image)})
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{84.61615654791771em}]{figure_28.eps}
+\end{center}
+\begin{matlabcode}
+% Combine the inverted high-pass filtered image and the low-pass 
+% filtered image using weighted average 
+% Interest of one half does not give the best result
+combined_image=0.32*((white_high_pass_filtered_image))+0.68*((low_pass_filtered_image));
+% Display combined image
+montage({uint8(combined_image)})
+\end{matlabcode}
+\begin{center}
+\includegraphics[width=\maxwidth{84.61615654791771em}]{figure_29.eps}
+\end{center}
+
+\end{document}
